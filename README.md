@@ -2,9 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Dataset](https://img.shields.io/badge/Dataset-Download-blue)](https://github.com/YourUsername/SeafloorAI)
-[![Paper](https://img.shields.io/badge/NeurIPS-2024-red)](https://neurips.cc/)
+[![Paper](https://img.shields.io/badge/NeurIPS-2024-red)](https://proceedings.neurips.cc/paper_files/paper/2024/hash/274de7d60333c0848f42e18ae97f13e3-Abstract-Datasets_and_Benchmarks_Track.html)
 
-**SeafloorAI** is the first extensive AI-ready dataset for seafloor mapping across 5 geological layers, curated in collaboration with marine scientists from USGS and NOAA.
+**SeafloorAI** is the first extensive AI-ready dataset for seafloor mapping across 5 geological layers, curated in collaboration with marine scientists.
 
 ## 🌊 Abstract
 
@@ -36,19 +36,13 @@ SeafloorAI/
 │   ├── input/
 │
 ```
-## 💻 Usage & Dataloader
 
-### 1. Installation
-Clone this repository and install the dependencies:
+## 🖼️ Samples
+## 💻 Visualization & Dataloader
 
-```bash
-git clone [https://github.com/YourUsername/SeafloorAI.git](https://github.com/YourUsername/SeafloorAI.git)
-cd SeafloorAI
-pip install numpy matplotlib pillow
-```
+### Simple Visualization
+The following script demonstrates how to load and inspect a sample sonar image pair:
 
-### 2. Loading Data (Python Example)
-You can use the following Python script to visualize a sample sonar image and its corresponding segmentation mask.
 ```python
 import os
 import matplotlib.pyplot as plt
@@ -93,6 +87,28 @@ if __name__ == "__main__":
     # Example usage:
     # visualize_sample(region='region1', image_id='0001', layer='sed')
     print("Function loaded. Please call visualize_sample with valid paths.")
+```
+
+### PyTorch Dataset Integration
+For deep learning workflows, we provide a standard `Dataset` implementation in `seafloor_dataset.py`.
+
+The following example demonstrates how to import and use it with a PyTorch `DataLoader`:
+
+```python
+from torch.utils.data import DataLoader
+from seafloor_dataset import SeafloorDataset
+import torchvision.transforms as T
+
+# 1. Initialize Dataset
+dataset = SeafloorDataset(
+    root_dir='./data', 
+    region='region1', 
+    target='sed',
+    transform=T.ToTensor()
+)
+
+# 2. Create DataLoader
+loader = DataLoader(dataset, batch_size=4, shuffle=True)
 ```
 
 ## 📜 Citation
