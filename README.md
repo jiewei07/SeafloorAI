@@ -46,10 +46,12 @@ The following script demonstrates how to load and inspect a sample sonar image p
 ```python
 import os
 import matplotlib.pyplot as plt
-from PIL import Image
+import numpy as np
 
 def visualize_sample(region, image_id, layer='sed'):
     """
+    Visualize sonar input layers and corresponding segmentation mask.
+    
     Args:
         region (str): Region name (e.g., 'region1')
         image_id (str): Image filename without extension
@@ -57,35 +59,48 @@ def visualize_sample(region, image_id, layer='sed'):
     """
     # Define paths (Adjust base path if necessary)
     base_path = f"./{region}"
-    img_path = os.path.join(base_path, 'input', f"{image_id}.png")
-    mask_path = os.path.join(base_path, layer, f"{image_id}.png")
+    img_path = os.path.join(base_path, 'input', f"{image_id}.npy")
+    mask_path = os.path.join(base_path, layer, f"{image_id}.npy")
 
     # Check if files exist
     if not os.path.exists(img_path) or not os.path.exists(mask_path):
         print(f"Error: File not found at {img_path}")
         return
 
-    # Load images
-    img = Image.open(img_path).convert('L')  # Grayscale for sonar
-    mask = Image.open(mask_path)
+    # Define the names of input layers
+    input_layers = ['backscatter', 'bathymetry', 'slope', 'rugosity']
 
-    # Plotting
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    
-    ax[0].imshow(img, cmap='gray')
-    ax[0].set_title(f"Sonar Input ({image_id})")
-    ax[0].axis('off')
+    # Load sonar input data (shape: C x H x W)
+    img = np.load(img_path)
 
-    ax[1].imshow(mask, cmap='jet') 
-    ax[1].set_title(f"Segmentation Mask ({layer})")
-    ax[1].axis('off')
+    # Load segmentation mask (shape: H x W)
+    mask = np.load(mask_path)
+
+    # Concatenate first 4 input channels with mask for visualization
+    img_show = np.concatenate([img[:4,:,:], mask[np.newaxis, ...]], axis=0)
+
+    # Create subplots: one for each channel (4 input + 1 mask)
+    fig, axes = plt.subplots(1, len(img_show), figsize=(16, 4))
+    if len(img_show) == 1:
+        axes = [axes]
+
+    # Iterate through each subplot and display corresponding image
+    for i, ax in enumerate(axes):
+        if i >= 4:
+            im = ax.imshow(img_show[i], cmap="tab20")
+            ax.set_title(f"Segmentation Mask ({layer})")
+            ax.axis('off')
+        else:
+            im = ax.imshow(img_show[i])
+            ax.set_title(f"Sonar Input ({input_layers[i]})")
+            ax.axis('off')
 
     plt.show()
 
 # --- Run the visualization ---
 if __name__ == "__main__":
     # Example usage:
-    # visualize_sample(region='region1', image_id='0001', layer='sed')
+    # visualize_sample(region='region1', image_id='region1_0000496_0000332', layer='sed')
     print("Function loaded. Please call visualize_sample with valid paths.")
 ```
 
